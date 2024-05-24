@@ -1,9 +1,10 @@
-const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } = require('@solana/web3.js');
-const { Keypair } = require('@solana/web3.js');
+const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL, Keypair  } = require('@solana/web3.js');
 const bs58 = require('bs58');
 
 const signTransaction = async(privateKey, publicKey2)=> {
     try {
+      console.log("privateKey: ", privateKey);
+      console.log("publicKey2: ", publicKey2);
       // Replace with your own private key in base58 format
     //   const privateKey = process.env.REACT_APP_SOLANA_PRIVATE_KEY;
       const keypair = Keypair.fromSecretKey(bs58.decode(privateKey));
@@ -11,22 +12,25 @@ const signTransaction = async(privateKey, publicKey2)=> {
       const connection = new Connection('https://api.devnet.solana.com');
       
       // Fetch the recent blockhash
-      const { blockhash } = await connection.getRecentBlockhash();
+      const blockhash = (await connection.getLatestBlockhash()).blockhash;
+      console.log('Blockhash:', blockhash);
 
       // Check your balance in lamports
       const balance = await connection.getBalance(keypair.publicKey);
       console.log('Balance:', balance/LAMPORTS_PER_SOL);
 
-      const transaction = new Transaction({
-        recentBlockhash: blockhash,
-        feePayer: keypair.publicKey,
-      }).add(
+      const transaction = new Transaction().add(
         SystemProgram.transfer({
           fromPubkey: keypair.publicKey,
-          toPubkey: new PublicKey(publicKey2),
+          toPubkey: publicKey2,
           lamports: 1000, // Amount in lamports (1 SOL = 1,000,000,000 lamports)
         })
       );
+
+      transaction.feePayer = keypair.publicKey;
+      transaction.recentBlockhash = blockhash;
+
+      console.log('Transaction:', transaction);
 
       // Sign the transaction
       transaction.sign(keypair);

@@ -212,22 +212,22 @@ const signTransaction = async()=> {
         const connection = new Connection('https://api.devnet.solana.com');
         
         // Fetch the recent blockhash
-        const { blockhash } = await connection.getRecentBlockhash();
+        const blockhash = (await connection.getLatestBlockhash()).blockhash;
 
         // Check your balance in lamports
         const balance = await connection.getBalance(keypair.publicKey);
         console.log('Balance:', balance/LAMPORTS_PER_SOL);
 
-        const transaction = new Transaction({
-        recentBlockhash: blockhash,
-        feePayer: keypair.publicKey,
-        }).add(
+        const transaction = new Transaction().add(
         SystemProgram.transfer({
             fromPubkey: keypair.publicKey,
-            toPubkey: new PublicKey(process.env.SOLANA_WALLET_C_PUBLIC_KEY),
+            toPubkey: process.env.SOLANA_WALLET_C_PUBLIC_KEY,
             lamports: 1000, // Amount in lamports (1 SOL = 1,000,000,000 lamports)
         })
         );
+
+        transaction.feePayer = keypair.publicKey;
+        transaction.recentBlockhash = blockhash;
 
         // Sign the transaction
         transaction.sign(keypair);
@@ -246,5 +246,4 @@ const signTransaction = async()=> {
 };
 
 // signTransaction();
-
 runServerMode();

@@ -2,6 +2,7 @@ import { build, analyzeMetafile } from "esbuild";
 
 const go = async () => {
   let result = await build({
+    // format: "esm",
     // entryPoints: ["./src/index.js"],
     entryPoints: ["./src/index1.js"],
     bundle: true,
@@ -10,7 +11,7 @@ const go = async () => {
     // outfile: "./dist/bundled.js",
     outfile: "./dist/bundled1.js",
     sourceRoot: "./",
-    platform: "node",
+    // platform: "node",
     metafile: true,
     // external: ["ethers"],
     // inject: ["./esbuild-shims.js"],
